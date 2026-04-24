@@ -346,11 +346,11 @@ Todos son correctos. Lo importante no es el número exacto sino que sea **varios
 **P1.** Ejecutá `wc -l programa.i` y escribí el número de líneas que obtenés.
 
 <!-- Completá la línea siguiente con el número exacto (solo dígitos, sin espacios): -->
-LINEAS_I=
+LINEAS_I=2273
 
 ¿Por qué ese número es tan mayor que las 94 líneas de `programa.c`?
 
-> **R:**
+> **R:**Porque en el preprocesamiento se copian todas las funciones de las librerias definidas en el programa.c
 
 ---
 
@@ -389,11 +389,11 @@ grep "Archivo fuente principal" programa.i   # no debe encontrar nada
 ¿El comando encuentra algo o no devuelve nada?
 
 <!-- Completá con SI (si encontró algo) o NO (si no encontró nada): -->
-COMENTARIOS_EN_I=
+COMENTARIOS_EN_I=NO
 
 ¿Por qué ocurre eso?
 
-> **R:**
+> **R:** Porque en la etapa de preprocesamiento tambien se eliminan comentarios, y este era uno
 
 ---
 
@@ -422,24 +422,33 @@ Nótese que `CUADRADO(5)` se expande a `((5) * (5))`, con los paréntesis extra 
 
 **P3.** Ejecutá `grep -n "CUADRADO" programa.i` y copiá la salida completa.
 
-> **R:**
+> **R:**200:# 100 "C:/msys64/ucrt64/include/stdio.h" 2 3
+218:  __attribute__((__format__(__gnu_scanf__, 1,0))) __attribute__ ((__nonnull__ (1)))
+238:  __attribute__((__format__(__gnu_printf__,1,0))) __attribute__ ((__nonnull__ (1)))
+273:  __attribute__((__format__(__ms_printf__, 1,0))) __attribute__ ((__nonnull__ (1)))
+450:  __attribute__((__format__(__ms_printf__, 1,0))) __attribute__ ((__nonnull__ (1)))
+679:# 1407 "C:/msys64/ucrt64/include/stdio.h" 3
+701:# 1408 "C:/msys64/ucrt64/include/stdio.h" 2 3
+2198:# 190 "C:/msys64/ucrt64/include/malloc.h" 3
+2233:    printf("=== Laboratorio de Compilacion en C (v%s) ===\n\n", "1.0");
+2242:    printf("CUADRADO(%d)      = %d\n", 5, ((5) * (5)));
 
 ¿El nombre `CUADRADO` aparece tal cual en `programa.i`, o fue reemplazado
 por otra cosa? Respondé SI o NO:
 
 <!-- Completá con SI o NO: -->
-CUADRADO_EN_I=
+CUADRADO_EN_I=SI
 
 ---
 
 **P4.** Ejecutá `grep -n '"1\.0"' programa.i` y copiá la línea encontrada.
 
-> **R:**
+> **R:**2233:    printf("=== Laboratorio de Compilacion en C (v%s) ===\n\n", "1.0");
 
 ¿Cuál era el nombre de la macro en `programa.c` que fue reemplazada por `"1.0"`?
 
 <!-- Completá con el nombre exacto de la macro (en mayúsculas, como está en el fuente): -->
-NOMBRE_MACRO_VERSION=
+NOMBRE_MACRO_VERSION=VERSION
 
 ---
 
@@ -475,13 +484,14 @@ gcc -E programa.c | grep "Iniciando"
 gcc -E -DDEBUG programa.c | grep "Iniciando"
 ```
 
-> **R:**
+> **R:**//NADA
+    printf("[DEBUG] %s\n", ("Iniciando main"));
 
 ¿Agregar `-DDEBUG` hace que aparezca código nuevo en el `.i` que antes no estaba?
 Respondé SI o NO:
 
 <!-- Completá con SI o NO: -->
-DEBUG_ACTIVA_CODIGO=
+DEBUG_ACTIVA_CODIGO=SI
 
 ---
 
@@ -489,9 +499,9 @@ DEBUG_ACTIVA_CODIGO=
 
 ```
 # 1 "<built-in>"
-# 1 "/usr/include/stdio.h" 1 3 4
-# 412 "/usr/include/stdio.h" 3 4
-# 1 "programa.c"
+# 1 "/usr/r/include/stdio.h" 3 4
+# 1 "programinclude/stdio.h" 1 3 4
+# 412 "/usa.c"
 ```
 
 Son **marcadores de línea** que el preprocesador inserta para registrar el origen de cada bloque. El formato es `# <número_de_línea> "<archivo>"`. El compilador los usa para reportar errores con el nombre y línea del archivo original (no del `.i`), y el debugger los usa para mapear instrucciones de máquina al fuente C.
@@ -504,7 +514,9 @@ grep -n "stdio.h" programa.i | head -5
 
 ¿Qué información comunican esas líneas `# N "archivo"`? ¿De qué archivo proviene el bloque que contiene la declaración de `printf`?
 
-> **R:**
+> **R:** # N= Es el número de línea original en el archivo de la librería
+         archivo = Es la ubicación real del archivo en la computadora
+    El archivo que contiene la declaracion printf es <stdio.h>
 
 ---
 
@@ -568,7 +580,7 @@ Un error léxico ocurre cuando el scanner encuentra una secuencia de caracteres 
 
 #### Análisis sintáctico (parser)
 
-El parser toma el flujo de tokens y verifica que su **orden y estructura** respetan la gramática del lenguaje. El resultado es el **AST** (ver más abajo). Si los tokens están en un orden gramaticalmente inválido (falta un `;`, un `{` sin cerrar, etc.), se produce un error sintáctico.
+El parser toma el flujo de tokns y verifica que su **orden y estructura** respetan la gramática del lenguaje. El resultado ees el **AST** (ver más abajo). Si los tokens están en un orden gramaticalmente inválido (falta un `;`, un `{` sin cerrar, etc.), se produce un error sintáctico.
 
 #### Análisis semántico
 
@@ -660,26 +672,37 @@ Aparecen como instrucciones de llamada (por ejemplo `bl _area_circulo`), pero **
 
 **P7.** Ejecutá `grep "area_circulo" programa.s` y copiá la salida.
 
-> **R:**
+> **R:**.ascii "area_circulo(%.1f) = %.4f\12\0"
+        call    area_circulo
+        .def    area_circulo;   .scl    2;      .type   32;     .endef
+
+
 
 ¿`area_circulo` aparece como una función *definida* en `programa.s`
 (con su propio bloque de instrucciones) o solo como una *llamada* (instrucción sin cuerpo)?
 Respondé DEFINIDA o LLAMADA:
 
 <!-- Completá con DEFINIDA o LLAMADA: -->
-AREA_EN_S=
+AREA_EN_S=LLAMADA
 
 ---
 
 **P8.** Encontrá en `programa.s` la etiqueta `sumar:` o `_sumar:` y copiá
 las primeras 4 líneas de instrucciones que le siguen.
 
-> **R:**
+> **R:**sumar:
+        pushq   %rbp
+        .seh_pushreg    %rbp
+        movq    %rsp, %rbp
+        .seh_setframe   %rbp, 0
 
 Explicá en términos generales qué hacen esas instrucciones
 (usá los comentarios del laboratorio como guía):
 
-> **R:**
+> **R:** 1 linea = Guarda en la pila el valor anterior de %rbp para poder restaurarlo cuando la función termine.
+        2 linea = Le informa al sistema que se guardó %rbp, para ayudar en debugging y manejo de errores.
+        3 linea = Copia el valor actual de la pila (%rsp) en %rbp para usarlo como referencia fija dentro de la función.
+        4 linea = Le indica al sistema que %rbp es la base del marco de la función actual.
 
 ---
 
@@ -692,13 +715,19 @@ grep "llamadas" programa.s
 
 **P9.** Ejecutá `grep "llamadas" programa.s` y copiá la salida.
 
-> **R:**
+> **R:**.globl  llamadas
+llamadas:
+        movl    llamadas(%rip), %eax
+        movl    %eax, llamadas(%rip)
+        movl    llamadas(%rip), %eax
+
+
 
 ¿Aparece la variable `llamadas` en el ensamblador?
 Respondé SI o NO:
 
 <!-- Completá con SI o NO: -->
-LLAMADAS_EN_S=
+LLAMADAS_EN_S=SI
 
 ---
 
@@ -802,13 +831,28 @@ Salida esperada (simplificada):
 
 **P10.** Ejecutá `nm programa.o` y copiá la salida completa.
 
-> **R:**
+> **R:**0000000000000000 b .bss
+0000000000000000 d .data
+0000000000000000 p .pdata
+0000000000000000 r .rdata
+0000000000000000 r .rdata$zzz
+0000000000000000 t .text
+0000000000000000 r .xdata
+                 U __main
+                 U area_circulo
+                 U factorial
+0000000000000149 T imprimir_separador
+0000000000000000 B llamadas
+0000000000000023 T main
+                 U printf
+                 U puts
+0000000000000000 T sumar
 
 ¿Con qué letra aparece `area_circulo` en esa tabla?
 Escribí solo la letra (una mayúscula):
 
 <!-- Completá con la letra exacta que muestra nm (U, T, D, etc.): -->
-TIPO_AREA_EN_O=
+TIPO_AREA_EN_O=U
 
 ---
 
@@ -828,13 +872,13 @@ nm matematica.o
 **P11.** ¿Por qué `area_circulo` tiene ese tipo en `programa.o`
 pero tipo `T` en `matematica.o`?
 
-> **R:**
+> **R:**Porque en progrica.o sí ama.o la función area_circulo se usa pero no está definida (símbolo U), mientras que en matematesta implementada, por eso aparece como T.
 
 ¿Qué etapa del proceso de compilación resuelve esa diferencia?
 Respondé con una palabra: PREPROCESAMIENTO, COMPILACION, ENSAMBLADO o ENLAZADO:
 
 <!-- Completá con una de las cuatro opciones: -->
-ETAPA_QUE_RESUELVE=
+ETAPA_QUE_RESUELVE=ENLAZADO 
 
 ---
 
@@ -853,13 +897,13 @@ Un `.o` no es ejecutable por dos razones:
 
 **P12.** Intentá ejecutar `./programa.o` directamente. ¿Qué mensaje aparece?
 
-> **R:**
+> **R:**bash: ./programa.o: cannot execute binary file: Exec format error
 
 ¿Se puede ejecutar un archivo `.o` directamente?
 Respondé SI o NO:
 
 <!-- Completá con SI o NO: -->
-EJECUTABLE_O=
+EJECUTABLE_O=NO
 
 ---
 
@@ -883,7 +927,7 @@ matematica.o ─┤
 libc.dylib  ──┘  (contiene printf, exit, crt1, malloc, etc.)
 ```
 
-#### ¿Qué es una biblioteca?
+#### ¿Qué es una biblioteca? 
 
 Una **biblioteca** (library) es una colección de funciones precompiladas, empaquetadas en un único archivo, listas para ser reutilizadas por cualquier programa. Existen dos tipos:
 
@@ -948,13 +992,13 @@ nm programa | grep area_circulo
 **P13.** Enlazá con `gcc programa.o matematica.o -o programa`.
 Ejecutá `nm programa | grep "area_circulo"` y copiá la salida.
 
-> **R:**
+> **R:**00000001400015c0 T area_circulo
 
 ¿Con qué letra aparece ahora `area_circulo` en el ejecutable final?
 Escribí solo la letra:
 
 <!-- Completá con la letra exacta que muestra nm: -->
-TIPO_AREA_ENLAZADO=
+TIPO_AREA_ENLAZADO=T
 
 ---
 
@@ -970,17 +1014,17 @@ Quedan algunos `U` incluso en el ejecutable final. ¿Por qué? Son funciones de 
 
 **P14.** Ejecutá `nm programa | grep "^ *U"` y copiá la salida.
 
-> **R:**
+> **R:**                 U __end__
 
 ¿Quedan símbolos de tipo `U` en el ejecutable final?
 Respondé SI o NO:
 
 <!-- Completá con SI o NO: -->
-SIMBOLOS_U_FINAL=
+SIMBOLOS_U_FINAL=SI
 
 ¿Por qué quedan? ¿Quién los resuelve y cuándo?
 
-> **R:**
+> **R:**Quedan porque gcc es un compilador dinamico, eso significa que llama a sus funciones en tiempo de ejecucion. Lo resuelve el "cargador dinamico" cuando el programa se ejecuta
 
 ---
 
@@ -994,12 +1038,25 @@ SIMBOLOS_U_FINAL=
 
 **P15.** Ejecutá `./programa` y copiá la salida completa.
 
-> **R:**
+> **R:**sumar(3, 4)       = 7
+CUADRADO(5)      = 25
+MAX(7, 12)        = 12
+----------------------------------------
+area_circulo(5.0) = 78.5398
+Factoriales:
+  0! = 1
+  1! = 1
+  2! = 2
+  3! = 6
+  4! = 24
+  5! = 120
+----------------------------------------
+Llamadas a sumar(): 1
 
 ¿Qué valor da `factorial(5)`? Escribí solo el número:
 
 <!-- Completá con el número exacto: -->
-FACTORIAL_5=
+FACTORIAL_5=120
 
 ---
 
@@ -1011,25 +1068,30 @@ FACTORIAL_5=
 como `CUADRADO(x)` y una **función real** como `sumar(a, b)`.
 ¿En qué etapa "desaparece" cada una? ¿Cuál tiene verificación de tipos?
 
-> **R:**
-
+> **R:**La macro CUADRADO(x) es reemplazada en la etapa de "Procesamiento", por lo que desaparece antes de compilar y no tiene verificación de tipos
+La funcion sumar(a, b) se compila y permanece hasta el ejecutable, y sí tiene verificacion de tipos durante la compilacion
 ---
 
 **P17.** ¿Qué diferencia hay entre un símbolo de tipo `T` y uno de tipo `D`
 en la salida de `nm`? ¿En qué sección del archivo objeto vive cada uno?
 
-> **R:**
-
+> **R:**La diferencia es que un símbolo T indica que esta definido en la seccion de código, mientras que D indica una variable global inicializada
+El T vive en la sección .text y el D en la sección .data.
 ---
 
 **P18.** (Bonus) Ejecutá `otool -L programa` (macOS) o `ldd programa` (Linux)
 y copiá la salida.
 
 > **R:**
+        ntdll.dll => /c/WINDOWS/SYSTEM32/ntdll.dll (0x7ffd0b8a0000)
+        KERNEL32.DLL => /c/WINDOWS/System32/KERNEL32.DLL (0x7ffd0aba0000)
+        KERNELBASE.dll => /c/WINDOWS/System32/KERNELBASE.dll (0x7ffd08900000)
+        ucrtbase.dll => /c/WINDOWS/System32/ucrtbase.dll (0x7ffd087b0000)
+
 
 ¿Por qué `libc` no hubo que especificarla explícitamente al enlazar con `gcc`?
 
-> **R:**
+> **R:**Porque gcc enlaza automáticamente la librería estándar de C por defecto durante la etapa de enlazado.
 
 ---
 
@@ -1223,34 +1285,94 @@ printf("%d\n", CUADRADO(n++));
 ```
 
 a. ¿Cuántas veces se evalúa `n++`? ¿Por qué?
+Se evalua dos veces porque la macro se expande asi ((n++) * (n++))
 b. ¿Cuál sería el resultado? ¿Es el esperado?
+El resultado es 12 y no es el esperado
 c. ¿Cómo se resolvería este problema usando una función real en lugar de una macro?
-
+int cuadrado(int x) {
+    return x * x;
+}
 ### E2 — Provocar y leer errores del compilador
 
 a. **Error léxico:** en `programa.c`, escribí una cadena sin cerrar: `printf("hola`. Intentá compilar con `gcc -S programa.c`. ¿En qué etapa falla y qué dice el mensaje de error?
+Falla durante la etapa de compilación, especificamente en el analisis lexico/sintactico, porque la cadena no esta cerrada y el compilador no puede formar correctamente los tokens.
 
 b. **Error sintáctico:** quitá un `;` al final de una declaración de variable. ¿Qué reporta el compilador? ¿Menciona la línea correcta?
+El compilador dice que falta un ; antes de int (línea 54). Sí muestra una linea cercana al error, pero no siempre es exactamente la correcta porque el error afecta el resto del codigo y genera errores en cascada.
 
 c. **Error semántico:** cambiá la llamada `sumar(3, 4)` por `sumar(3, 4, 5)`. ¿En qué etapa falla? ¿Por qué es semántico y no sintáctico?
+Falla en el análisis semántico. Es semántico porque la sintaxis es correcta, pero la funcion sumar espera 2 argumentos y se le estan pasando 3, lo que no tiene sentido según su definición.
 
 d. **Error de enlazado:** comentá toda la implementación de `factorial` en `matematica.c` y recompilá solo el objeto (`gcc -c matematica.c -o matematica.o`). ¿Falla? Ahora intentá enlazar. ¿Cuándo falla y cuál es el mensaje exacto?
+No falla al compilar el objeto, pero falla al enlazar porque la función factorial ya no existe en ningún archivo objeto. El linker no encuentra su definición, ya que programa.o la usa pero matematica.o no la contiene, y por eso aparece un error.
+El mensaje es: $  gcc matematica.o programa.o -o comentfactori
+                  collect2.exe: error: ld returned 1 exit status
 
 ### E3 — Agregar una función nueva
 
 a. Declarar en `matematica.h` el prototipo: `double potencia(double base, int exp);`
-b. Implementar la función en `matematica.c` sin usar `<math.h>`.
-c. Llamarla desde `main()` en `programa.c`.
-d. Compilar paso a paso y verificar con `nm` que el símbolo `potencia` aparece como `U` en `programa.o` y como `T` en el ejecutable final.
+int    factorial(int n);
 
+b. Implementar la función en `matematica.c` sin usar `<math.h>`.
+double potencia(double a, int exp) {
+    double total = 1;
+    for (int i = 0; i < exp; i++) {
+        total = total * a;
+    }
+    return total;
+}
+
+c. Llamarla desde `main()` en `programa.c`.
+  printf("potencia(2, 3) = %d\n", potencia(2, 3));
+
+d. Compilar paso a paso y verificar con `nm` que el símbolo `potencia` aparece como `U` en `programa.o` y como `T` en el ejecutable final.
+$ nm programa.o
+$ nm programa.o
+0000000000000000 b .bss
+0000000000000000 d .data
+0000000000000000 p .pdata
+0000000000000000 r .rdata
+0000000000000000 r .rdata$zzz
+0000000000000000 t .text
+0000000000000000 r .xdata
+                 U __main
+                 U area_circulo
+                 U factorial
+000000000000017f T imprimir_separador
+0000000000000000 B llamadas
+0000000000000023 T main
+                 U potencia
+                 U printf
+                 U puts
+//////////////////////////////////////////////
+         :
+0000000140003050 d options
+0000000140003000 d p.0
+0000000140001683 T potencia
+00000001400029c0 T printf
+0000000140002b58 T puts
+0000000140002c90 t register_frame_ctor
+0000000140001010 t safe_flush
+         :
 ### E4 — Enlazado estático vs dinámico
 
 a. Compilar el programa con enlazado estático: `gcc programa.c matematica.c -o programa_static -static` (puede no funcionar en macOS; usar Linux o WSL).
 b. Comparar el tamaño del ejecutable dinámico vs el estático con `ls -lh programa programa_static`.
-c. Ejecutar `ldd programa_static` (Linux). ¿Qué diferencia hay respecto a `ldd programa`?
+EN WSL:
+-rwxrwxrwx 1 jherson jherson 137K Apr 24 18:00 programa.exe
+-rwxrwxrwx 1 jherson jherson 768K Apr 24 18:11 programa_static
 
+c. Ejecutar `ldd programa_static` (Linux). ¿Qué diferencia hay respecto a `ldd programa`?
+//NO FUNCIONO, EN WSL DICE QUE NO DEPENDEN DE NINGUN ARCHIVO DINAMICO Y EN GIT TIENEN LAS MISMAS DEPENDENCIAS DE LOS MISMOS ARCHIVOS 
 ### E5 — Inspección con Clang
 
 a. Ejecutar `clang -Xclang -dump-tokens programa.c 2>&1 | grep "programa.c" | wc -l`. ¿Cuántos tokens tiene `programa.c`?
+199
 b. Buscar en la salida del AST (`clang -Xclang -ast-dump`) la función `factorial`. ¿Cómo se representa la recursión en el árbol?
+FunctionDecl factorial
+ └── CompoundStmt
+      └── CallExpr factorial   ← se llama a sí misma
+
 c. ¿Aparece algún `ImplicitCastExpr` en el AST? ¿Qué conversión realiza?
+Sí, aparecen varias. 
+Es una conversión implícita donde el compilador transforma una función en un puntero a función para poder usarla como valor.

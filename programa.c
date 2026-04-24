@@ -69,6 +69,8 @@ int main(void) {
     /* Uso de macro MAX (definida en matematica.h) */
     printf("MAX(7, 12)        = %d\n", MAX(7, 12));
 
+    printf("potencia(2, 3) = %d\n", potencia(2, 3));  // * ACA ESTA LA LLAMADAAAAAAAAAAAAAAAAAAAAAAAA
+
     imprimir_separador();
 
     /* Funciones de matematica.c  →  se resuelven en el ENLAZADO */
@@ -82,6 +84,8 @@ int main(void) {
     imprimir_separador();
 
     printf("Llamadas a sumar(): %d\n", llamadas);
+
+    
 
     return EXIT_SUCCESS;
 }

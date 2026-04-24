@@ -23,3 +23,12 @@ int factorial(int n) {
     if (n <= 1) return 1;
     return n * factorial(n - 1);
 }
+double potencia(double a, int exp) {
+    double total = 1;
+    for (int i = 0; i < exp; i++) {
+        total = total * a;
+    }
+    return total;
+}
+
+

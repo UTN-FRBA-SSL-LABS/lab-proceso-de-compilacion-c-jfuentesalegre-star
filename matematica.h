@@ -19,4 +19,6 @@
 double area_circulo(double radio);
 int    factorial(int n);
 
+double potencia(double base, int exp); // *AGREGAMOSSSS
+
 #endif /* MATEMATICA_H */
