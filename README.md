@@ -1376,3 +1376,4 @@ FunctionDecl factorial
 c. ¿Aparece algún `ImplicitCastExpr` en el AST? ¿Qué conversión realiza?
 Sí, aparecen varias. 
 Es una conversión implícita donde el compilador transforma una función en un puntero a función para poder usarla como valor.
+<!-- ssl-autograding-update: 2026-06-09 -->
